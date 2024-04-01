@@ -4,7 +4,6 @@ const Allocator = std.mem.Allocator;
 const ArrayList = std.ArrayList;
 
 pub const ParseError = error{
-    InvalidDocument,
     InvalidDocumentSize,
     InvalidStringSize,
     InvalidBinarySize,
@@ -15,7 +14,7 @@ pub const ParseError = error{
 pub fn parse(input: []const u8, allocator: Allocator) (ParseError || Allocator.Error)!Document {
     var input_ = input;
     if (input_.len < 5 or input_[input_.len - 1] != 0) {
-        return ParseError.InvalidDocument;
+        return ParseError.InvalidDocumentSize;
     }
 
     const doc_size = std.mem.readIntSliceLittle(i32, input_);
@@ -407,7 +406,7 @@ test "parse returns error if input len is less than 5" {
     inline for (0..5) |len| {
         const input: [len]u8 = undefined;
         const result = parse(&input, testing.allocator);
-        try testing.expectError(ParseError.InvalidDocument, result);
+        try testing.expectError(ParseError.InvalidDocumentSize, result);
     }
 }
 
@@ -416,7 +415,7 @@ test "parse returns error if input is not null terminated" {
     for (1..256) |b| {
         input[4] = @intCast(b);
         const result = parse(&input, testing.allocator);
-        try testing.expectError(ParseError.InvalidDocument, result);
+        try testing.expectError(ParseError.InvalidDocumentSize, result);
     }
 }
 
